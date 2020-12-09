@@ -2219,6 +2219,7 @@ class FrameworkExtension extends Extension
                 $container->getDefinition('notifier.channel.email')->setArgument(0, null);
             }
             $container->getDefinition('notifier.channel.sms')->setArgument(0, null);
+            $container->getDefinition('notifier.channel.web_push')->setArgument(0, null);
         }
 
         $container->getDefinition('notifier.channel_policy')->setArgument(0, $config['channel_policy']);

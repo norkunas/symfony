@@ -17,12 +17,14 @@ use Symfony\Component\Notifier\Channel\ChannelPolicy;
 use Symfony\Component\Notifier\Channel\ChatChannel;
 use Symfony\Component\Notifier\Channel\EmailChannel;
 use Symfony\Component\Notifier\Channel\SmsChannel;
+use Symfony\Component\Notifier\Channel\WebPushChannel;
 use Symfony\Component\Notifier\Chatter;
 use Symfony\Component\Notifier\ChatterInterface;
 use Symfony\Component\Notifier\EventListener\NotificationLoggerListener;
 use Symfony\Component\Notifier\EventListener\SendFailedMessageToNotifierListener;
 use Symfony\Component\Notifier\Message\ChatMessage;
 use Symfony\Component\Notifier\Message\SmsMessage;
+use Symfony\Component\Notifier\Message\WebPushMessage;
 use Symfony\Component\Notifier\Messenger\MessageHandler;
 use Symfony\Component\Notifier\Notifier;
 use Symfony\Component\Notifier\NotifierInterface;
@@ -56,6 +58,10 @@ return static function (ContainerConfigurator $container) {
         ->set('notifier.channel.email', EmailChannel::class)
             ->args([service('mailer.transports'), service('messenger.default_bus')->ignoreOnInvalid()])
             ->tag('notifier.channel', ['channel' => 'email'])
+
+        ->set('notifier.channel.web_push', WebPushChannel::class)
+            ->args([service('texter.transports'), service('messenger.default_bus')->ignoreOnInvalid()])
+            ->tag('notifier.channel', ['channel' => 'web_push'])
 
         ->set('notifier.monolog_handler', NotifierHandler::class)
             ->args([service('notifier')])
@@ -102,6 +108,10 @@ return static function (ContainerConfigurator $container) {
         ->set('texter.messenger.sms_handler', MessageHandler::class)
             ->args([service('texter.transports')])
             ->tag('messenger.message_handler', ['handles' => SmsMessage::class])
+
+        ->set('texter.messenger.web_push_handler', MessageHandler::class)
+            ->args([service('texter.transports')])
+            ->tag('messenger.message_handler', ['handles' => WebPushMessage::class])
 
         ->set('notifier.logger_notification_listener', NotificationLoggerListener::class)
             ->tag('kernel.event_subscriber')
