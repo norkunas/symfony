@@ -16,9 +16,12 @@ use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyReadInfo;
 use Symfony\Component\PropertyInfo\PropertyWriteInfo;
+use Symfony\Component\PropertyInfo\TargetClassResolver;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\AdderRemoverDummy;
+use Symfony\Component\PropertyInfo\Tests\Fixtures\ConstructorDummy;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\DefaultValue;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy;
+use Symfony\Component\PropertyInfo\Tests\Fixtures\DummyInterface;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\NotInstantiable;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\Php71Dummy;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\Php71DummyExtended;
@@ -26,6 +29,7 @@ use Symfony\Component\PropertyInfo\Tests\Fixtures\Php71DummyExtended2;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\Php74Dummy;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\Php7Dummy;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\Php7ParentDummy;
+use Symfony\Component\PropertyInfo\Tests\Fixtures\Php80Dummy;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
@@ -593,5 +597,21 @@ class ReflectionExtractorTest extends TestCase
             ['dateTime', [new Type(Type::BUILTIN_TYPE_OBJECT, false, 'DateTime')]],
             ['ddd', null],
         ];
+    }
+
+    /**
+     * @requires PHP 7.4
+     */
+    public function testResolvesTargetToClass()
+    {
+        $targetClassResolver = new TargetClassResolver([
+            DummyInterface::class => Php74Dummy::class,
+        ]);
+        $customExtractor = new ReflectionExtractor(null, null, null, true, ReflectionExtractor::ALLOW_PUBLIC, null, ReflectionExtractor::ALLOW_MAGIC_GET | ReflectionExtractor::ALLOW_MAGIC_SET, $targetClassResolver);
+
+        $this->assertEquals([new Type(Type::BUILTIN_TYPE_OBJECT, false, Php74Dummy::class)], $customExtractor->getTypes(Php74Dummy::class, 'propA'));
+        $this->assertEquals([new Type(Type::BUILTIN_TYPE_OBJECT, false, Php74Dummy::class)], $customExtractor->getTypesFromConstructor(Php74Dummy::class, 'propB'));
+        $this->assertEquals([new Type(Type::BUILTIN_TYPE_OBJECT, false, Php74Dummy::class)], $customExtractor->getTypes(Php74Dummy::class, 'propC'));
+        $this->assertEquals([new Type(Type::BUILTIN_TYPE_OBJECT, false, Php74Dummy::class)], $customExtractor->getTypes(Php74Dummy::class, 'propD'));
     }
 }

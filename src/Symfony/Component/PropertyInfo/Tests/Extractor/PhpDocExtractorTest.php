@@ -16,7 +16,10 @@ use phpDocumentor\Reflection\DocBlock\Tags\InvalidTag;
 use phpDocumentor\Reflection\Types\Collection;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
+use Symfony\Component\PropertyInfo\TargetClassResolver;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy;
+use Symfony\Component\PropertyInfo\Tests\Fixtures\DummyInterface;
+use Symfony\Component\PropertyInfo\Tests\Fixtures\DocInterfacedDummy;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\ParentDummy;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\TraitUsage\DummyUsedInTrait;
 use Symfony\Component\PropertyInfo\Tests\Fixtures\TraitUsage\DummyUsingTrait;
@@ -403,6 +406,19 @@ class PhpDocExtractorTest extends TestCase
             ['dateTime', null],
             ['ddd', null],
         ];
+    }
+
+    public function testResolvesInterfaceToClass()
+    {
+        $targetClassResolver = new TargetClassResolver([
+            DummyInterface::class => DocInterfacedDummy::class,
+        ]);
+        $customExtractor = new PhpDocExtractor(null, null, null, null, $targetClassResolver);
+
+        $this->assertEquals([new Type(Type::BUILTIN_TYPE_OBJECT, false, DocInterfacedDummy::class)], $customExtractor->getTypes(DocInterfacedDummy::class, 'propA'));
+        $this->assertEquals([new Type(Type::BUILTIN_TYPE_OBJECT, false, DocInterfacedDummy::class)], $customExtractor->getTypesFromConstructor(DocInterfacedDummy::class, 'propB'));
+        $this->assertEquals([new Type(Type::BUILTIN_TYPE_OBJECT, false, DocInterfacedDummy::class)], $customExtractor->getTypes(DocInterfacedDummy::class, 'propC'));
+        $this->assertEquals([new Type(Type::BUILTIN_TYPE_OBJECT, false, DocInterfacedDummy::class)], $customExtractor->getTypes(DocInterfacedDummy::class, 'propD'));
     }
 }
 

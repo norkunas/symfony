@@ -994,6 +994,13 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('property_info')
                     ->info('Property info configuration')
                     ->{$enableIfStandalone('symfony/property-info', PropertyInfoExtractorInterface::class)}()
+                    ->fixXmlConfig('resolve_target_class')
+                    ->children()
+                        ->arrayNode('resolve_target_classes')
+                            ->useAttributeAsKey('target')
+                            ->prototype('scalar')->end()
+                        ->end()
+                    ->end()
                 ->end()
             ->end()
         ;

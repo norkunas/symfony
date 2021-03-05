@@ -453,6 +453,7 @@ class ConfigurationTest extends TestCase
             ],
             'property_info' => [
                 'enabled' => !class_exists(FullStack::class),
+                'resolve_target_classes' => [],
             ],
             'router' => [
                 'enabled' => false,

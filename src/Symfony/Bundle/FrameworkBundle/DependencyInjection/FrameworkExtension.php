@@ -1746,6 +1746,11 @@ class FrameworkExtension extends Extension
 
         if (ContainerBuilder::willBeAvailable('phpdocumentor/reflection-docblock', DocBlockFactoryInterface::class, ['symfony/framework-bundle', 'symfony/property-info'])) {
             $definition = $container->register('property_info.php_doc_extractor', 'Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor');
+            $definition->setArgument(0, null);
+            $definition->setArgument(1, null);
+            $definition->setArgument(2, null);
+            $definition->setArgument(3, null);
+            $definition->setArgument(4, new Reference('property_info.target_class_resolver'));
             $definition->addTag('property_info.description_extractor', ['priority' => -1000]);
             $definition->addTag('property_info.type_extractor', ['priority' => -1001]);
         }

@@ -19,6 +19,8 @@ use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyWriteInfo;
 use Symfony\Component\PropertyInfo\PropertyWriteInfoExtractorInterface;
+use Symfony\Component\PropertyInfo\TargetClassResolver;
+use Symfony\Component\PropertyInfo\Tests\Fixtures\Php80Dummy;
 use Symfony\Component\PropertyInfo\Type;
 use Symfony\Component\String\Inflector\EnglishInflector;
 use Symfony\Component\String\Inflector\InflectorInterface;
@@ -78,12 +80,14 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
     private $arrayMutatorPrefixesFirst;
     private $arrayMutatorPrefixesLast;
 
+    private $targetClassResolver;
+
     /**
      * @param string[]|null $mutatorPrefixes
      * @param string[]|null $accessorPrefixes
      * @param string[]|null $arrayMutatorPrefixes
      */
-    public function __construct(array $mutatorPrefixes = null, array $accessorPrefixes = null, array $arrayMutatorPrefixes = null, bool $enableConstructorExtraction = true, int $accessFlags = self::ALLOW_PUBLIC, InflectorInterface $inflector = null, int $magicMethodsFlags = self::ALLOW_MAGIC_GET | self::ALLOW_MAGIC_SET)
+    public function __construct(array $mutatorPrefixes = null, array $accessorPrefixes = null, array $arrayMutatorPrefixes = null, bool $enableConstructorExtraction = true, int $accessFlags = self::ALLOW_PUBLIC, InflectorInterface $inflector = null, int $magicMethodsFlags = self::ALLOW_MAGIC_GET | self::ALLOW_MAGIC_SET, ?TargetClassResolver $targetClassResolver = null)
     {
         $this->mutatorPrefixes = null !== $mutatorPrefixes ? $mutatorPrefixes : self::$defaultMutatorPrefixes;
         $this->accessorPrefixes = null !== $accessorPrefixes ? $accessorPrefixes : self::$defaultAccessorPrefixes;
@@ -96,6 +100,8 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
 
         $this->arrayMutatorPrefixesFirst = array_merge($this->arrayMutatorPrefixes, array_diff($this->mutatorPrefixes, $this->arrayMutatorPrefixes));
         $this->arrayMutatorPrefixesLast = array_reverse($this->arrayMutatorPrefixesFirst);
+
+        $this->targetClassResolver = $targetClassResolver;
     }
 
     /**
@@ -582,6 +588,10 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
         }
         if ('parent' === $lcName && $parent = $declaringClass->getParentClass()) {
             return $parent->name;
+        }
+
+        if ($this->targetClassResolver !== null && ($targetClass = $this->targetClassResolver->getTargetClass($name))) {
+            return $targetClass;
         }
 
         return $name;

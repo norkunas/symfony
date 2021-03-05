@@ -22,6 +22,7 @@ use Symfony\Component\PropertyInfo\PropertyListExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyReadInfoExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyWriteInfoExtractorInterface;
+use Symfony\Component\PropertyInfo\TargetClassResolver;
 
 return static function (ContainerConfigurator $container) {
     $container->services()
@@ -41,6 +42,17 @@ return static function (ContainerConfigurator $container) {
 
         // Extractor
         ->set('property_info.reflection_extractor', ReflectionExtractor::class)
+            ->args([
+                null,
+                null,
+                null,
+                true,
+                ReflectionExtractor::ALLOW_PUBLIC,
+                null,
+                ReflectionExtractor::ALLOW_MAGIC_GET | ReflectionExtractor::ALLOW_MAGIC_SET,
+                service('property_info.target_class_resolver'),
+            ])
+            ->arg(7, service('property_info.target_class_resolver'))
             ->tag('property_info.list_extractor', ['priority' => -1000])
             ->tag('property_info.type_extractor', ['priority' => -1002])
             ->tag('property_info.access_extractor', ['priority' => -1000])
@@ -48,5 +60,7 @@ return static function (ContainerConfigurator $container) {
 
         ->alias(PropertyReadInfoExtractorInterface::class, 'property_info.reflection_extractor')
         ->alias(PropertyWriteInfoExtractorInterface::class, 'property_info.reflection_extractor')
+
+        ->set('property_info.target_class_resolver', TargetClassResolver::class)
     ;
 };

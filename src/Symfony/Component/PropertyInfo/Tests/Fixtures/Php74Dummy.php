@@ -14,7 +14,7 @@ namespace Symfony\Component\PropertyInfo\Tests\Fixtures;
 /**
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class Php74Dummy
+class Php74Dummy implements DummyInterface
 {
     public Dummy $dummy;
     private ?bool $nullableBoolProp;
@@ -22,11 +22,25 @@ class Php74Dummy
     private array $stringCollection;
     public array $collection = [];
 
+    private DummyInterface $propA;
+
+    public function __construct(DummyInterface $propB)
+    {
+    }
+
     public function addStringCollection(string $string): void
     {
     }
 
     public function removeStringCollection(string $string): void
+    {
+    }
+
+    public function getPropC(): DummyInterface
+    {
+    }
+
+    public function setPropD(DummyInterface $propD)
     {
     }
 }

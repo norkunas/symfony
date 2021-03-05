@@ -1,3 +1,5 @@
 framework:
     property_info:
         enabled: true
+        resolve_target_classes:
+            Symfony\Component\PropertyInfo\Tests\Fixtures\DummyInterface: DocInterfacedDummy

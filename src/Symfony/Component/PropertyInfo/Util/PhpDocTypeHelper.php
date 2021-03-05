@@ -17,6 +17,7 @@ use phpDocumentor\Reflection\Types\Collection;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Nullable;
+use Symfony\Component\PropertyInfo\TargetClassResolver;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
@@ -27,6 +28,13 @@ use Symfony\Component\PropertyInfo\Type;
  */
 final class PhpDocTypeHelper
 {
+    private $targetClassResolver;
+
+    public function __construct(?TargetClassResolver $targetClassResolver = null)
+    {
+        $this->targetClassResolver = $targetClassResolver;
+    }
+
     /**
      * Creates a {@see Type} from a PHPDoc type.
      *
@@ -176,6 +184,12 @@ final class PhpDocTypeHelper
             return ['object', $docType];
         }
 
-        return ['object', substr($docType, 1)]; // substr to strip the namespace's `\`-prefix
+        $docType = substr($docType, 1); // substr to strip the namespace's `\`-prefix
+
+        if ($this->targetClassResolver !== null && ($targetClass = $this->targetClassResolver->getTargetClass($docType)) !== null) {
+            $docType = $targetClass;
+        }
+
+        return ['object', $docType];
     }
 }
